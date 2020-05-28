@@ -12,12 +12,34 @@ def executor(inc):
     gzhArticle = WxGzhArticle()
     qqmail = qqMail()
     # 定义一个公众号列表
-    gzh_list = ['OK数码2016']
-    for gzh in gzh_list:
-        art = gzhArticle.getNewGzhArticle(gzh)
-        if art is not None:
+    gzh_list = getGzhList()
+    # 遍历字典列表
+    for key, value in gzh_list.items():
+        art = gzhArticle.getNewGzhArticle(key)
+        if art is not None and art['title'] != value:
             qqmail.send_mail(title=art['title'], content=art['href'], receiver='76816025@qq.com')
+            gzh_list[key] = art['title']
+    # 更新公众号列表并回写文件
+    updateGzhList(gzh_list)
     schedule.enter(inc, 0, executor, (inc,))
+
+
+def getGzhList():
+    gzh_list = {}
+    with open('gzhList.txt', 'r') as f:
+        for line in f.readlines():
+            if len(line.strip('\n')) > 3:
+                k, v = line.split(' ', 2)
+                gzh_list[k] = v.strip('\n')
+    return gzh_list
+
+
+def updateGzhList(gzh_list):
+    with open('gzhList.txt', 'w+') as f:
+        # 遍历字典列表
+        for k, v in gzh_list.items():
+            f.write(k + ' ' + v)
+            f.write('\n')
 
 
 # # 添加调度任务//TODO:待验证是否可用
@@ -32,6 +54,7 @@ def executor(inc):
 # 第一个参数是一个可以返回时间戳的函数，第二个参数可以在定时未到达之前阻塞。
 schedule = sched.scheduler(time.time, time.sleep)
 
+
 # 默认参数60s
 def main(inc=60):
     # enter四个参数分别为：间隔事件、优先级（用于同时间到达的两个事件同时执行时定序）、被调用触发的函数，
@@ -41,5 +64,5 @@ def main(inc=60):
 
 
 # 10s 输出一次
-main(60)
-# executor(10)
+main(600)
+# executor(600)
