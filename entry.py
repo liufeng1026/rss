@@ -13,13 +13,17 @@ def executor(inc):
     qqmail = qqMail()
     # 定义一个公众号列表
     gzh_list = getGzhList()
+    print ("获取要跟踪的公众号列表为:", gzh_list)
     # 遍历字典列表
     for key, value in gzh_list.items():
         art = gzhArticle.getNewGzhArticle(key)
+        print ("公众号:{key}的历史文章为:{value}".format(key=key,value=value))
         if art is not None and art['title'] != value:
+            print ("公众号:{key}的最新文章为:{value}".format(key=key, value=art['title']))
             qqmail.send_mail(title=art['title'], content=art['href'], receiver='76816025@qq.com')
             gzh_list[key] = art['title']
     # 更新公众号列表并回写文件
+    print ("更新跟踪的公众号列表为:", gzh_list)
     updateGzhList(gzh_list)
     schedule.enter(inc, 0, executor, (inc,))
 
@@ -64,5 +68,6 @@ def main(inc=60):
 
 
 # 10s 输出一次
+print ("开始执行获取微信公众号任务")
 main(600)
 # executor(600)

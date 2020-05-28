@@ -29,4 +29,5 @@ class qqMail:
         msg["To"] = Header("接收者", 'utf-8')  ## 接收者的别名
 
         smtp.sendmail(self.sender_mail, receiver, msg.as_string())
+        print ("发送邮件成功，标题：{subject}@@@@@内容：{content}".format(subject = title, content = content))
         smtp.quit()
