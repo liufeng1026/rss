@@ -5,10 +5,11 @@ from qqmail import qqMail
 import scheduleTask
 import sched
 import time
+import re
 from datetime import datetime
 
 
-def executor(inc):
+def executor():
     gzhArticle = WxGzhArticle()
     qqmail = qqMail()
     # 定义一个公众号列表
@@ -25,15 +26,16 @@ def executor(inc):
     # 更新公众号列表并回写文件
     print ("更新跟踪的公众号列表为:", gzh_list)
     updateGzhList(gzh_list)
-    schedule.enter(inc, 0, executor, (inc,))
+    schedule.enter(60, 0, executor, ())
 
 
 def getGzhList():
     gzh_list = {}
     with open('gzhList.txt', 'r') as f:
         for line in f.readlines():
+            print line
             if len(line.strip('\n')) > 3:
-                k, v = line.split(' ', 2)
+                k,v = line.split('    ',1)
                 gzh_list[k] = v.strip('\n')
     return gzh_list
 
@@ -42,7 +44,7 @@ def updateGzhList(gzh_list):
     with open('gzhList.txt', 'w+') as f:
         # 遍历字典列表
         for k, v in gzh_list.items():
-            f.write(k + ' ' + v)
+            f.write(k + '    ' + v)
             f.write('\n')
 
 
@@ -60,14 +62,13 @@ schedule = sched.scheduler(time.time, time.sleep)
 
 
 # 默认参数60s
-def main(inc=60):
+def main(inc=10):
     # enter四个参数分别为：间隔事件、优先级（用于同时间到达的两个事件同时执行时定序）、被调用触发的函数，
     # 给该触发函数的参数（tuple形式）
-    schedule.enter(0, 0, executor, (inc,))
+    schedule.enter(inc, 0, executor, ())
     schedule.run()
 
 
 # 10s 输出一次
 print ("开始执行获取微信公众号任务")
-main(600)
-# executor(600)
+main(10)
